@@ -206,7 +206,7 @@ Inspect the `diamonds` dataset. What do the `cut`, `color`, and `clarity` variab
 ```{r q1-task}
 ## TODO: Inspect the `diamonds` dataset here
 # solution-begin
-?diamonds
+diamonds
 # solution-end
 ```
 
@@ -281,12 +281,12 @@ The following code *filters* the dataset to only those rows where `carat <= 1.1`
 
 ```{r q4-task}
 ## TODO: Complete the following code
-# solution-begin
+# task-begin
 ggplot(
   data = diamonds %>% 
     filter(carat <= 1.1),
 )
-# solution-end
+# task-end
 # solution-begin
 ggplot(
   data = diamonds %>% 
