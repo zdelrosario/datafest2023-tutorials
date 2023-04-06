@@ -2,7 +2,6 @@ SRC := $(wildcard *main.Rmd)
 ASSIGNMENTS := $(subst main,assignment,$(SRC))
 SOLUTIONS := $(subst main,solution,$(SRC))
 OS := $(shell uname)
-# ${RSTUDIO_PASS} # Set in environment variables
 
 all: ${ASSIGNMENTS} ${SOLUTIONS}
 
