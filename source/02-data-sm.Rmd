@@ -1,0 +1,162 @@
+---
+title: "Data Management and String Handling: Supplemental Materials"
+author: Zach del Rosario
+date: 2023-04-07
+output: github_document
+---
+
+*Purpose*. Process the Lincoln-Douglas debate transcripts into a speaker-labelled, per-sentence format. This will be a useful starting point for the tutorial dataset.
+
+*Note*. Transcripts obtained from the Northern Illinois University: Digital Library, [Lincoln/Net Page](https://digital.lib.niu.edu/illinois/lincoln/topics/lincolndouglas).
+
+# Setup
+
+```{r}
+library(tidyverse)
+
+# Data directory
+dir_data <- "./data"
+# Find all the data files
+df_files_all <-
+  tibble(filename = list.files(dir_data, full.names = TRUE)) %>%
+  mutate(name = str_sub(str_extract(filename, "[^/]+\\."), 1, -2)) %>% 
+  filter(str_detect(filename, "\\d+.*\\.txt"))
+```
+
+## Load all data
+
+```{r}
+df_raw <- 
+  df_files_all %>%
+  pmap_dfr(
+    .,
+    function(filename, name) {
+      tibble(fulltext = read_file(filename)) %>% 
+        mutate(debate = name)
+    }
+  )
+
+df_raw
+```
+
+## Separate sentences
+
+
+```{r}
+df_sentences <- 
+  df_raw %>% 
+  mutate(sentence = str_split(fulltext, "(?<!Mr|Ms|Mrs)\\.")) %>% 
+  select(-fulltext) %>% 
+  unnest_longer(sentence)
+
+df_sentences
+```
+
+## Label Speaker
+
+The debates took a consistent format, which is reflected in the transcript annotations. We can use this to help label the speaker for each sentence.
+
+I've copied the headers from the text. Let's inspect them for patterns we can use:
+
+### Headers
+
+01-ottawa
+- `Mr. Douglas's Opening Speech.`
+- `Mr. Lincoln's Reply in the Ottawa Joint Debate.`
+- `Mr. Douglas's Rejoinder in the Ottawa Joint Debate.`
+02-freeport
+- `Mr. Lincoln's Opening Speech.`
+- `Mr. Douglas's Reply in the Freeport Joint Debate.`
+- `Mr. Lincoln's Rejoinder in the Freeport Joint Debate.`
+03-jonesboro
+- `Mr. Douglas's Opening Speech`
+- `Mr. Lincoln's Reply in the Jonesboro Joint Debate`
+- `Mr. Douglas's Rejoinder in the Jonesboro Joint Debate.`
+04-charleston
+- `Mr. Lincoln's Opening Speech`
+- `Senator Douglas's Reply in the Charleston Joint Debate`
+- `Lincoln's Rejoinder in the Charleston Joint Debate`
+05-galesburg
+- `Mr. Douglas's Opening Speech`
+- `Mr. Lincoln's Reply at Galesburg Joint Debate`
+- `Mr. Douglas's Rejoinder in the Galesburgh Joint Debate`
+06-quincy
+- `Mr. Lincoln's Opening Speech`
+- `Mr. Douglas's Reply in the Quincy Joint Debate`
+- `Mr. Lincoln's Rejoinder in the Quincy Joint Debate`
+07-alton
+- `Senator Douglas's Opening Speech.`
+- `Mr. Lincoln's Reply in the Alton Joint Debate.`
+- `Mr. Douglas's Rejoinder in the Alton Joint Debate.`
+
+*Observations*
+- Douglas is alternatively referred to as `Senator Douglas` or `Mr. Douglas`; we'll have to ignore his title.
+- All debates followed the pattern of `Opening Speech`, `Reply`, then `Rejoinder`. We can use this consistent pattern to help label the speaker for each sentence.
+
+```{r}
+df_speaker <- 
+  df_sentences %>% 
+  extract(
+    sentence,
+    c("speaker", "part"),
+    "(?<name>Lincoln|Douglas).*(?<part>Opening Speech|Reply|Rejoinder)",
+    remove = FALSE
+  ) %>% 
+  fill(speaker, part) %>% 
+  select(debate, speaker, part, sentence)
+
+df_speaker
+```
+
+## Write the data
+
+```{r}
+write_rds(df_speaker, "./data/lincoln-douglas-debates.rds")
+```
+
+
+# Analyze
+
+## Narrative Index
+
+Randy Olson proposed the [Narrative Index](http://www.scienceneedsstory.com/blog/the-narrative-index/) as a quantitative way to summarize the amount of "narrative content" of a transcript. The narrative index is defined as
+
+$$NI = \frac{\text{# of `but's in text}}{\text{# of `and's in text}} \times 100$$
+
+The following code computes the narrative index for each debate transcript, grouped by speaker.
+
+```{r ni-compute}
+df_ni <- 
+  df_speaker %>% 
+  mutate(
+    n_but = str_count(sentence, "[Bb]ut"),
+    n_and = str_count(sentence, "[Aa]nd"),
+  ) %>% 
+  group_by(debate, speaker) %>% 
+  summarize(
+    n_but = sum(n_but),
+    n_and = sum(n_and)
+  ) %>% 
+  mutate(ni = n_but / n_and * 100) %>% 
+  ungroup()
+
+df_ni
+```
+
+Visualize the results to compare against Olson's work.
+
+```{r ni-viz}
+df_ni %>% 
+  ggplot(aes(debate, ni)) +
+  geom_col(aes(fill = speaker), position = "dodge") +
+  scale_fill_manual(
+    values = c("Douglas" = "blue", "Lincoln" = "red")
+  ) +
+  theme_minimal() +
+  labs(
+    x = "Debate",
+    y = "Narrative Index\n(# 'but' / # 'and' x 100)"
+  )
+```
+
+This figure is very close to Olson's results, but my NI is off Olson's results by a bit for many cases. For instance, Olson's figure suggests that Lincoln had NI = 20 for the Alton debate. However, I found ~19 instead. Perhaps he used a different source for his transcripts?
