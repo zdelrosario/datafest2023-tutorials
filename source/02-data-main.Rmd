@@ -335,11 +335,10 @@ We can produce a similar frequency dataset for the Gettysburg Address:
 ```{r}
 df_words_gettysburg <- 
   df_gettysburg %>% 
-  mutate(word = str_split(sentence, "\\s+|[[:punct:]]")) %>% 
+  mutate(word = str_split(sentence, "[[:punct:]\\s]+")) %>% 
   select(word) %>% 
   unnest_longer(word) %>% 
   mutate(word = str_to_lower(word)) %>% 
-  filter(str_detect(word, "\\w+")) %>% 
   count(word) %>% 
   mutate(f = n / sum(n)) %>% 
   arrange(desc(n))
@@ -367,4 +366,66 @@ df_compare_words %>%
 This gives a sense for which words Lincoln used that are not so common (compared to modern speech). This isn't a great estimate for Lincoln's *general* speech patterns (it's a short speech, and many of these uncommon words are used just once), but it does pick out some "curious" words.
 
 # (EXERCISES)
+
+## Using `select()`
+
+## Using `filter()`
+
+## Using `mutate()`
+
+### __qX__ Make lower case
+
+```{r qX-task}
+df_qX <- 
+  df_gettysburg %>% 
+  mutate(sentence = str_to_lower(sentence))
+```
+
+Use the following to check your work.
+
+```{r}
+if (
+  df_qX %>% 
+    pull(sentence) %>% 
+    str_detect(., "[A-Z]") %>% 
+    any()
+) {
+  print("Capital letter detected")
+} else {
+  print("Correct!")
+}
+```
+
+
+
+## Some useful recipies
+
+### Breaking sentences into words
+
+
+
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]]
+```
+
+We can split on all whitespace characters by using the pattern `\\s+`:
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "\\s+")
+```
+
+However, that leaves the commas associated with some words! Instead, we can use a collection of different characters; the special capture symbol `[:punct:]` will capture any and all punctuation. Putting both symbols in square brackets `[...]` means "use either of these." Chaining all of this together
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "[[:punct:]\\s+]+")
+```
 
