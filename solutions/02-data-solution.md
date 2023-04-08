@@ -653,4 +653,134 @@ We can make a number of observations:
         with Olson’s assertion that a high NI corresponds with a more
         memorable communication.
 
+## Relative frequencies
+
+One last analysis; we can look for interesting trends by comparing the
+frequency of words in our dataset against the frequency of words as they
+tend to occur in other sources.
+
+The following downloads a word frequency dataset from [Peter Norvig’s
+website](http://norvig.com/ngrams/). This is from the *Google Web
+Trillion Word Corpus*, which will reflect more modern speech, rather
+than the contemporary speech patterns at the time of the Gettysburg
+Address.
+
+``` r
+url_count1w <- "http://norvig.com/ngrams/count_1w.txt"
+filename_count1w <- "./data/count_1w.txt"
+
+## Download the data locally
+curl::curl_download(
+  url_count1w,
+  destfile = filename_count1w
+)
+
+## Loads the downloaded file
+df_words_web <- read_delim(
+  filename_count1w,
+  col_names = c("word", "n")
+) %>% 
+  mutate(f = n / sum(n))
+```
+
+    ## Rows: 333333 Columns: 2
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (1): word
+    ## dbl (1): n
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+df_words_web
+```
+
+    ## # A tibble: 333,333 × 3
+    ##    word            n       f
+    ##    <chr>       <dbl>   <dbl>
+    ##  1 the   23135851162 0.0393 
+    ##  2 of    13151942776 0.0224 
+    ##  3 and   12997637966 0.0221 
+    ##  4 to    12136980858 0.0206 
+    ##  5 a      9081174698 0.0154 
+    ##  6 in     8469404971 0.0144 
+    ##  7 for    5933321709 0.0101 
+    ##  8 is     4705743816 0.00800
+    ##  9 on     3750423199 0.00638
+    ## 10 that   3400031103 0.00578
+    ## # ℹ 333,323 more rows
+
+We can produce a similar frequency dataset for the Gettysburg Address:
+
+``` r
+df_words_gettysburg <- 
+  df_gettysburg %>% 
+  mutate(word = str_split(sentence, "\\s+|[[:punct:]]")) %>% 
+  select(word) %>% 
+  unnest_longer(word) %>% 
+  mutate(word = str_to_lower(word)) %>% 
+  filter(str_detect(word, "\\w+")) %>% 
+  count(word) %>% 
+  mutate(f = n / sum(n)) %>% 
+  arrange(desc(n))
+
+df_words_gettysburg
+```
+
+    ## # A tibble: 138 × 3
+    ##    word      n      f
+    ##    <chr> <int>  <dbl>
+    ##  1 that     13 0.0478
+    ##  2 the      11 0.0404
+    ##  3 we       10 0.0368
+    ##  4 here      8 0.0294
+    ##  5 to        8 0.0294
+    ##  6 a         7 0.0257
+    ##  7 and       6 0.0221
+    ##  8 can       5 0.0184
+    ##  9 for       5 0.0184
+    ## 10 have      5 0.0184
+    ## # ℹ 128 more rows
+
+By merging the two datasets on the `word` column, we can compare the
+frequency from the Gettysburg Address against the modern frequency
+database.
+
+``` r
+df_compare_words <- 
+  df_words_gettysburg %>% 
+  select(word, n, f) %>% 
+  left_join(
+    df_words_web %>% select(word, f),
+    by = "word",
+    suffix = c("_gettysburg", "_web")
+  ) %>% 
+  mutate(r = f_gettysburg / f_web)
+
+df_compare_words %>% 
+  arrange(desc(r))
+```
+
+    ## # A tibble: 138 × 5
+    ##    word            n f_gettysburg       f_web      r
+    ##    <chr>       <int>        <dbl>       <dbl>  <dbl>
+    ##  1 consecrate      1      0.00368 0.000000193 19060.
+    ##  2 nobly           1      0.00368 0.000000202 18206.
+    ##  3 hallow          1      0.00368 0.000000238 15417.
+    ##  4 consecrated     1      0.00368 0.000000850  4323.
+    ##  5 dedicate        2      0.00735 0.00000171   4306.
+    ##  6 detract         1      0.00368 0.000000896  4104.
+    ##  7 perish          1      0.00368 0.00000154   2388.
+    ##  8 devotion        2      0.00735 0.00000394   1865.
+    ##  9 conceived       2      0.00735 0.00000479   1535.
+    ## 10 endure          1      0.00368 0.00000328   1119.
+    ## # ℹ 128 more rows
+
+This gives a sense for which words Lincoln used that are not so common
+(compared to modern speech). This isn’t a great estimate for Lincoln’s
+*general* speech patterns (it’s a short speech, and many of these
+uncommon words are used just once), but it does pick out some “curious”
+words.
+
 # (EXERCISES)

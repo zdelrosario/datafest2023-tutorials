@@ -298,6 +298,67 @@ We can make a number of observations:
 - The Gettysburg Address had a *much* higher NI than any of these debates
   - This suggests that, even for a "storytelling-heavy" speaker like Lincoln, the Gettysburg Address was a particularly narrative-heavy speech.
   - Given how memorable this speech is, the results seem to agree with Olson's assertion that a high NI corresponds with a more memorable communication.
+  
+## Relative frequencies
+
+One last analysis; we can look for interesting trends by comparing the frequency of words in our dataset against the frequency of words as they tend to occur in other sources.
+
+The following downloads a word frequency dataset from [Peter Norvig's website](http://norvig.com/ngrams/). This is from the *Google Web Trillion Word Corpus*, which will reflect more modern speech, rather than the contemporary speech patterns at the time of the Gettysburg Address.
+  
+```{r}
+url_count1w <- "http://norvig.com/ngrams/count_1w.txt"
+filename_count1w <- "./data/count_1w.txt"
+
+## Download the data locally
+curl::curl_download(
+  url_count1w,
+  destfile = filename_count1w
+)
+
+## Loads the downloaded file
+df_words_web <- read_delim(
+  filename_count1w,
+  col_names = c("word", "n")
+) %>% 
+  mutate(f = n / sum(n))
+df_words_web
+```
+
+We can produce a similar frequency dataset for the Gettysburg Address:
+  
+```{r}
+df_words_gettysburg <- 
+  df_gettysburg %>% 
+  mutate(word = str_split(sentence, "\\s+|[[:punct:]]")) %>% 
+  select(word) %>% 
+  unnest_longer(word) %>% 
+  mutate(word = str_to_lower(word)) %>% 
+  filter(str_detect(word, "\\w+")) %>% 
+  count(word) %>% 
+  mutate(f = n / sum(n)) %>% 
+  arrange(desc(n))
+
+df_words_gettysburg
+```
+  
+By merging the two datasets on the `word` column, we can compare the frequency from the Gettysburg Address against the modern frequency database.
+
+```{r}
+df_compare_words <- 
+  df_words_gettysburg %>% 
+  select(word, n, f) %>% 
+  left_join(
+    df_words_web %>% select(word, f),
+    by = "word",
+    suffix = c("_gettysburg", "_web")
+  ) %>% 
+  mutate(r = f_gettysburg / f_web)
+
+df_compare_words %>% 
+  arrange(desc(r))
+```
+
+This gives a sense for which words Lincoln used that are not so common (compared to modern speech). This isn't a great estimate for Lincoln's *general* speech patterns (it's a short speech, and many of these uncommon words are used just once), but it does pick out some "curious" words.
 
 # (EXERCISES)
 
