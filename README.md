@@ -10,3 +10,4 @@ If you get stuck on any of the exercises, you can consult the solutions here:
 
 - [00-install](https://github.com/zdelrosario/datafest2023-tutorials/blob/main/solutions/00-install-solution.md)
 - [01-visualization](https://github.com/zdelrosario/datafest2023-tutorials/blob/main/solutions/01-visualization-solution.md)
+- [02-data](https://github.com/zdelrosario/datafest2023-tutorials/blob/main/solutions/02-data-solution.md)
