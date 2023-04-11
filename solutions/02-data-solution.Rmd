@@ -329,11 +329,10 @@ We can produce a similar frequency dataset for the Gettysburg Address:
 ```{r}
 df_words_gettysburg <- 
   df_gettysburg %>% 
-  mutate(word = str_split(sentence, "\\s+|[[:punct:]]")) %>% 
+  mutate(word = str_split(sentence, "[[:punct:]\\s]+")) %>% 
   select(word) %>% 
   unnest_longer(word) %>% 
   mutate(word = str_to_lower(word)) %>% 
-  filter(str_detect(word, "\\w+")) %>% 
   count(word) %>% 
   mutate(f = n / sum(n)) %>% 
   arrange(desc(n))
@@ -361,4 +360,237 @@ df_compare_words %>%
 This gives a sense for which words Lincoln used that are not so common (compared to modern speech). This isn't a great estimate for Lincoln's *general* speech patterns (it's a short speech, and many of these uncommon words are used just once), but it does pick out some "curious" words.
 
 # (EXERCISES)
+
+## Using `select()`
+
+The `select()` function helps you to select particular columns. This is helpful for moving columns around to inspect a dataset. One 
+
+```{r}
+mpg %>% 
+  select(manufacturer, model, class)
+```
+
+One useful trick is to use the `everything()` function with `select()`. This will include all of the not-specified columns. This effectively allows you to move columns around, without dropping anything:
+
+```{r}
+mpg %>% 
+  select(class, everything())
+```
+
+### __q1__ Move the columns
+
+Move the columns so that `model` is the leftmost column, and `trans` is to its right. Make sure to preserve all the other columns.
+
+```{r}
+# Complete the following code
+df_q1 <- 
+  mpg
+df_q1 <- 
+  mpg %>% 
+  select(model, trans, everything())
+```
+
+Run the following chunk to check your work.
+
+```{r}
+if (!all(names(df_q1)[1:2] == c("model", "trans"))) {
+  print("Leftmost columns are not correct")
+} else if (!setequal(names(df_q1), names(mpg))) {
+  print("Your DataFrame is missing columns; did you forget everything()?")
+} else {
+  print("Correct!")
+}
+```
+
+
+## Using `filter()`
+
+The `filter()` function helps us find rows that match certain conditions. We can use any of a variety of comparisons, such as numerical comparisons `x < y`, or exact equality `x == y`. For instance, the following code filters to just one manufacturer.
+
+```{r}
+mpg %>% 
+  filter(manufacturer == "audi")
+```
+
+
+### __q2__ Filter for an exact string
+
+Filter the dataset `mpg` to return only the rows where the `class` is `"compact"`.
+
+```{r}
+# Complete the following code
+df_q2 <- 
+  mpg
+df_q2 <- 
+  mpg %>% 
+  filter(class == "compact")
+```
+
+Run the following chunk to check your work.
+
+```{r}
+if (any(df_q2$class != "compact")) {
+  print("Your filter is not correct.")
+} else {
+  print("Correct!")
+}
+```
+
+
+### String handling tools
+
+There are a variety of useful string-handling tools provided in the `tidyverse` package. Here are just a few:
+
+- `str_detect(column, "pattern")`: Detect the presence of a substring (in this case, "pattern")
+- `str_count(column, "pattern")`: Count the number of times a substring appears (in this case, "pattern")
+- `str_to_lower(column)`: Convert the entire string to lowercase
+- `str_to_upper(column)`: Convert the entire string to uppercase
+
+The [stringr cheatsheet](https://www.google.com/search?client=firefox-b-1-d&q=stringr+cheatshet) lists all of the available string-handling tools in the tidyverse. I recommend downloading it and taking a look at your options!
+
+### __q3__ Detect a substring
+
+Filter the `mpg` dataset to only those rows where `model` contains the string `"2wd"`.
+
+```{r}
+# Complete the following code
+df_q3 <- 
+  mpg
+df_q3 <-
+  mpg %>%
+  filter(str_detect(model, "2wd"))
+```
+
+Run the following chunk to check your work.
+
+```{r}
+if (any(!str_detect(df_q3$model, "2wd"))) {
+  print("Your filter is not correct.")
+} else {
+  print("Correct!")
+}
+```
+
+## Using `mutate()`
+
+The `mutate()` function allows you to derive new values from old ones. For instance, the following code computes the average of the `cty` and `hwy` fuel economy values.
+
+```{r}
+mpg %>% 
+  mutate(avg = (cty + hwy) / 2) %>% 
+  select(avg, cty, hwy, everything())
+```
+
+
+### __q4__ Make lower case
+
+Use an appropriate string-handling tool to change every `sentence` to lower-case.
+
+```{r qX-task}
+# Complete the following code
+df_q4 <- 
+  df_gettysburg
+df_q4 <- 
+  df_gettysburg %>% 
+  mutate(sentence = str_to_lower(sentence))
+```
+
+Use the following to check your work.
+
+```{r}
+if (
+  df_q4 %>% 
+    pull(sentence) %>% 
+    str_detect(., "[A-Z]") %>% 
+    any()
+) {
+  print("Capital letter detected")
+} else {
+  print("Correct!")
+}
+```
+
+### __q5__ Count the `"but"`s
+
+Count the number of `"but"`s in each line of the Gettysburg Address. Make sure to match both `"But"` and `"but"`.
+
+```{r}
+df_q5 <- 
+  df_gettysburg
+df_q5 <- 
+  df_gettysburg %>% 
+  mutate(n_but = str_count(sentence, "[Bb]ut"))
+```
+
+Use the following to check your work.
+
+```{r}
+if (
+  !all(
+    df_q5 %>% 
+      pull(sentence) %>% 
+      str_count(., "[Bb]ut") ==
+    df_q5 %>% 
+      pull(n_but)
+  )
+) {
+  print("Incorrect number of 'but's. Did you remember to account for letter case?")
+} else {
+  print("Correct!")
+}
+```
+
+
+## Some useful recipies
+
+Let's go through some of the string manipulations we saw in the Live Demo in slow-motion.
+
+### Breaking sentences into words
+
+Above, I broke sentences down to their individual words. This is helpful for certain kinds of analyses. For instance, let's focus on the following sentence:
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]]
+```
+
+We can split on all whitespace characters by using the pattern `\\s+`: this is called a *regular expression*.
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "\\s+")
+```
+
+However, that leaves the commas associated with some words! Instead, we can use a collection of different characters; the regular expression `[:punct:]` will capture any and all punctuation. Putting both symbols in square brackets `[...]` means "use either of these." Chaining all of this together
+
+```{r}
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "[[:punct:]\\s]+")
+```
+
+### Reshaping the data
+
+Splitting the sentences into words is a good idea, but there's a bit more work we need to do to make the data useful. Look at what happens when we split the sentences into words:
+
+```{r}
+df_gettysburg %>% 
+  mutate(words = str_split(sentence, "[[:punct:]\\s]+")) %>% 
+  select(words)
+```
+
+We can't see the actual words! That's because each row "value" is actually a list of words (technically, a character vector). To deal with this, we can use the function `unnest_longer()` to "unravel" each of the word lists into its own row:
+
+```{r}
+df_gettysburg %>% 
+  mutate(word = str_split(sentence, "[[:punct:]\\s]+")) %>% 
+  select(word) %>% 
+  unnest_longer(word)
+```
+
+This is a far more useful arrangement of the data. You can learn more about tidying data [here](https://posit.cloud/learn/primers/4).
 

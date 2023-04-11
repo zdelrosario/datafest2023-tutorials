@@ -716,11 +716,10 @@ We can produce a similar frequency dataset for the Gettysburg Address:
 ``` r
 df_words_gettysburg <- 
   df_gettysburg %>% 
-  mutate(word = str_split(sentence, "\\s+|[[:punct:]]")) %>% 
+  mutate(word = str_split(sentence, "[[:punct:]\\s]+")) %>% 
   select(word) %>% 
   unnest_longer(word) %>% 
   mutate(word = str_to_lower(word)) %>% 
-  filter(str_detect(word, "\\w+")) %>% 
   count(word) %>% 
   mutate(f = n / sum(n)) %>% 
   arrange(desc(n))
@@ -728,20 +727,20 @@ df_words_gettysburg <-
 df_words_gettysburg
 ```
 
-    ## # A tibble: 138 × 3
+    ## # A tibble: 139 × 3
     ##    word      n      f
     ##    <chr> <int>  <dbl>
-    ##  1 that     13 0.0478
-    ##  2 the      11 0.0404
-    ##  3 we       10 0.0368
-    ##  4 here      8 0.0294
-    ##  5 to        8 0.0294
-    ##  6 a         7 0.0257
-    ##  7 and       6 0.0221
-    ##  8 can       5 0.0184
-    ##  9 for       5 0.0184
-    ## 10 have      5 0.0184
-    ## # ℹ 128 more rows
+    ##  1 that     13 0.0476
+    ##  2 the      11 0.0403
+    ##  3 we       10 0.0366
+    ##  4 here      8 0.0293
+    ##  5 to        8 0.0293
+    ##  6 a         7 0.0256
+    ##  7 and       6 0.0220
+    ##  8 can       5 0.0183
+    ##  9 for       5 0.0183
+    ## 10 have      5 0.0183
+    ## # ℹ 129 more rows
 
 By merging the two datasets on the `word` column, we can compare the
 frequency from the Gettysburg Address against the modern frequency
@@ -762,20 +761,20 @@ df_compare_words %>%
   arrange(desc(r))
 ```
 
-    ## # A tibble: 138 × 5
+    ## # A tibble: 139 × 5
     ##    word            n f_gettysburg       f_web      r
     ##    <chr>       <int>        <dbl>       <dbl>  <dbl>
-    ##  1 consecrate      1      0.00368 0.000000193 19060.
-    ##  2 nobly           1      0.00368 0.000000202 18206.
-    ##  3 hallow          1      0.00368 0.000000238 15417.
-    ##  4 consecrated     1      0.00368 0.000000850  4323.
-    ##  5 dedicate        2      0.00735 0.00000171   4306.
-    ##  6 detract         1      0.00368 0.000000896  4104.
-    ##  7 perish          1      0.00368 0.00000154   2388.
-    ##  8 devotion        2      0.00735 0.00000394   1865.
-    ##  9 conceived       2      0.00735 0.00000479   1535.
-    ## 10 endure          1      0.00368 0.00000328   1119.
-    ## # ℹ 128 more rows
+    ##  1 consecrate      1      0.00366 0.000000193 18991.
+    ##  2 nobly           1      0.00366 0.000000202 18139.
+    ##  3 hallow          1      0.00366 0.000000238 15360.
+    ##  4 consecrated     1      0.00366 0.000000850  4307.
+    ##  5 dedicate        2      0.00733 0.00000171   4290.
+    ##  6 detract         1      0.00366 0.000000896  4089.
+    ##  7 perish          1      0.00366 0.00000154   2380.
+    ##  8 devotion        2      0.00733 0.00000394   1858.
+    ##  9 conceived       2      0.00733 0.00000479   1529.
+    ## 10 endure          1      0.00366 0.00000328   1115.
+    ## # ℹ 129 more rows
 
 This gives a sense for which words Lincoln used that are not so common
 (compared to modern speech). This isn’t a great estimate for Lincoln’s
@@ -784,3 +783,390 @@ uncommon words are used just once), but it does pick out some “curious”
 words.
 
 # (EXERCISES)
+
+## Using `select()`
+
+The `select()` function helps you to select particular columns. This is
+helpful for moving columns around to inspect a dataset. One
+
+``` r
+mpg %>% 
+  select(manufacturer, model, class)
+```
+
+    ## # A tibble: 234 × 3
+    ##    manufacturer model      class  
+    ##    <chr>        <chr>      <chr>  
+    ##  1 audi         a4         compact
+    ##  2 audi         a4         compact
+    ##  3 audi         a4         compact
+    ##  4 audi         a4         compact
+    ##  5 audi         a4         compact
+    ##  6 audi         a4         compact
+    ##  7 audi         a4         compact
+    ##  8 audi         a4 quattro compact
+    ##  9 audi         a4 quattro compact
+    ## 10 audi         a4 quattro compact
+    ## # ℹ 224 more rows
+
+One useful trick is to use the `everything()` function with `select()`.
+This will include all of the not-specified columns. This effectively
+allows you to move columns around, without dropping anything:
+
+``` r
+mpg %>% 
+  select(class, everything())
+```
+
+    ## # A tibble: 234 × 11
+    ##    class   manufacturer model    displ  year   cyl trans drv     cty   hwy fl   
+    ##    <chr>   <chr>        <chr>    <dbl> <int> <int> <chr> <chr> <int> <int> <chr>
+    ##  1 compact audi         a4         1.8  1999     4 auto… f        18    29 p    
+    ##  2 compact audi         a4         1.8  1999     4 manu… f        21    29 p    
+    ##  3 compact audi         a4         2    2008     4 manu… f        20    31 p    
+    ##  4 compact audi         a4         2    2008     4 auto… f        21    30 p    
+    ##  5 compact audi         a4         2.8  1999     6 auto… f        16    26 p    
+    ##  6 compact audi         a4         2.8  1999     6 manu… f        18    26 p    
+    ##  7 compact audi         a4         3.1  2008     6 auto… f        18    27 p    
+    ##  8 compact audi         a4 quat…   1.8  1999     4 manu… 4        18    26 p    
+    ##  9 compact audi         a4 quat…   1.8  1999     4 auto… 4        16    25 p    
+    ## 10 compact audi         a4 quat…   2    2008     4 manu… 4        20    28 p    
+    ## # ℹ 224 more rows
+
+### **q1** Move the columns
+
+Move the columns so that `model` is the leftmost column, and `trans` is
+to its right. Make sure to preserve all the other columns.
+
+``` r
+# Complete the following code
+df_q1 <- 
+  mpg
+df_q1 <- 
+  mpg %>% 
+  select(model, trans, everything())
+```
+
+Run the following chunk to check your work.
+
+``` r
+if (!all(names(df_q1)[1:2] == c("model", "trans"))) {
+  print("Leftmost columns are not correct")
+} else if (!setequal(names(df_q1), names(mpg))) {
+  print("Your DataFrame is missing columns; did you forget everything()?")
+} else {
+  print("Correct!")
+}
+```
+
+    ## [1] "Correct!"
+
+## Using `filter()`
+
+The `filter()` function helps us find rows that match certain
+conditions. We can use any of a variety of comparisons, such as
+numerical comparisons `x < y`, or exact equality `x == y`. For instance,
+the following code filters to just one manufacturer.
+
+``` r
+mpg %>% 
+  filter(manufacturer == "audi")
+```
+
+    ## # A tibble: 18 × 11
+    ##    manufacturer model      displ  year   cyl trans drv     cty   hwy fl    class
+    ##    <chr>        <chr>      <dbl> <int> <int> <chr> <chr> <int> <int> <chr> <chr>
+    ##  1 audi         a4           1.8  1999     4 auto… f        18    29 p     comp…
+    ##  2 audi         a4           1.8  1999     4 manu… f        21    29 p     comp…
+    ##  3 audi         a4           2    2008     4 manu… f        20    31 p     comp…
+    ##  4 audi         a4           2    2008     4 auto… f        21    30 p     comp…
+    ##  5 audi         a4           2.8  1999     6 auto… f        16    26 p     comp…
+    ##  6 audi         a4           2.8  1999     6 manu… f        18    26 p     comp…
+    ##  7 audi         a4           3.1  2008     6 auto… f        18    27 p     comp…
+    ##  8 audi         a4 quattro   1.8  1999     4 manu… 4        18    26 p     comp…
+    ##  9 audi         a4 quattro   1.8  1999     4 auto… 4        16    25 p     comp…
+    ## 10 audi         a4 quattro   2    2008     4 manu… 4        20    28 p     comp…
+    ## 11 audi         a4 quattro   2    2008     4 auto… 4        19    27 p     comp…
+    ## 12 audi         a4 quattro   2.8  1999     6 auto… 4        15    25 p     comp…
+    ## 13 audi         a4 quattro   2.8  1999     6 manu… 4        17    25 p     comp…
+    ## 14 audi         a4 quattro   3.1  2008     6 auto… 4        17    25 p     comp…
+    ## 15 audi         a4 quattro   3.1  2008     6 manu… 4        15    25 p     comp…
+    ## 16 audi         a6 quattro   2.8  1999     6 auto… 4        15    24 p     mids…
+    ## 17 audi         a6 quattro   3.1  2008     6 auto… 4        17    25 p     mids…
+    ## 18 audi         a6 quattro   4.2  2008     8 auto… 4        16    23 p     mids…
+
+### **q2** Filter for an exact string
+
+Filter the dataset `mpg` to return only the rows where the `class` is
+`"compact"`.
+
+``` r
+# Complete the following code
+df_q2 <- 
+  mpg
+df_q2 <- 
+  mpg %>% 
+  filter(class == "compact")
+```
+
+Run the following chunk to check your work.
+
+``` r
+if (any(df_q2$class != "compact")) {
+  print("Your filter is not correct.")
+} else {
+  print("Correct!")
+}
+```
+
+    ## [1] "Correct!"
+
+### String handling tools
+
+There are a variety of useful string-handling tools provided in the
+`tidyverse` package. Here are just a few:
+
+  - `str_detect(column, "pattern")`: Detect the presence of a substring
+    (in this case, “pattern”)
+  - `str_count(column, "pattern")`: Count the number of times a
+    substring appears (in this case, “pattern”)
+  - `str_to_lower(column)`: Convert the entire string to lowercase
+  - `str_to_upper(column)`: Convert the entire string to uppercase
+
+The [stringr
+cheatsheet](https://www.google.com/search?client=firefox-b-1-d&q=stringr+cheatshet)
+lists all of the available string-handling tools in the tidyverse. I
+recommend downloading it and taking a look at your options\!
+
+### **q3** Detect a substring
+
+Filter the `mpg` dataset to only those rows where `model` contains the
+string `"2wd"`.
+
+``` r
+# Complete the following code
+df_q3 <- 
+  mpg
+df_q3 <-
+  mpg %>%
+  filter(str_detect(model, "2wd"))
+```
+
+Run the following chunk to check your work.
+
+``` r
+if (any(!str_detect(df_q3$model, "2wd"))) {
+  print("Your filter is not correct.")
+} else {
+  print("Correct!")
+}
+```
+
+    ## [1] "Correct!"
+
+## Using `mutate()`
+
+The `mutate()` function allows you to derive new values from old ones.
+For instance, the following code computes the average of the `cty` and
+`hwy` fuel economy values.
+
+``` r
+mpg %>% 
+  mutate(avg = (cty + hwy) / 2) %>% 
+  select(avg, cty, hwy, everything())
+```
+
+    ## # A tibble: 234 × 12
+    ##      avg   cty   hwy manufacturer model      displ  year   cyl trans drv   fl   
+    ##    <dbl> <int> <int> <chr>        <chr>      <dbl> <int> <int> <chr> <chr> <chr>
+    ##  1  23.5    18    29 audi         a4           1.8  1999     4 auto… f     p    
+    ##  2  25      21    29 audi         a4           1.8  1999     4 manu… f     p    
+    ##  3  25.5    20    31 audi         a4           2    2008     4 manu… f     p    
+    ##  4  25.5    21    30 audi         a4           2    2008     4 auto… f     p    
+    ##  5  21      16    26 audi         a4           2.8  1999     6 auto… f     p    
+    ##  6  22      18    26 audi         a4           2.8  1999     6 manu… f     p    
+    ##  7  22.5    18    27 audi         a4           3.1  2008     6 auto… f     p    
+    ##  8  22      18    26 audi         a4 quattro   1.8  1999     4 manu… 4     p    
+    ##  9  20.5    16    25 audi         a4 quattro   1.8  1999     4 auto… 4     p    
+    ## 10  24      20    28 audi         a4 quattro   2    2008     4 manu… 4     p    
+    ## # ℹ 224 more rows
+    ## # ℹ 1 more variable: class <chr>
+
+### **q4** Make lower case
+
+Use an appropriate string-handling tool to change every `sentence` to
+lower-case.
+
+``` r
+# Complete the following code
+df_q4 <- 
+  df_gettysburg
+df_q4 <- 
+  df_gettysburg %>% 
+  mutate(sentence = str_to_lower(sentence))
+```
+
+Use the following to check your work.
+
+``` r
+if (
+  df_q4 %>% 
+    pull(sentence) %>% 
+    str_detect(., "[A-Z]") %>% 
+    any()
+) {
+  print("Capital letter detected")
+} else {
+  print("Correct!")
+}
+```
+
+    ## [1] "Correct!"
+
+### **q5** Count the `"but"`s
+
+Count the number of `"but"`s in each line of the Gettysburg Address.
+Make sure to match both `"But"` and `"but"`.
+
+``` r
+df_q5 <- 
+  df_gettysburg
+df_q5 <- 
+  df_gettysburg %>% 
+  mutate(n_but = str_count(sentence, "[Bb]ut"))
+```
+
+Use the following to check your work.
+
+``` r
+if (
+  !all(
+    df_q5 %>% 
+      pull(sentence) %>% 
+      str_count(., "[Bb]ut") ==
+    df_q5 %>% 
+      pull(n_but)
+  )
+) {
+  print("Incorrect number of 'but's. Did you remember to account for letter case?")
+} else {
+  print("Correct!")
+}
+```
+
+    ## [1] "Correct!"
+
+## Some useful recipies
+
+Let’s go through some of the string manipulations we saw in the Live
+Demo in slow-motion.
+
+### Breaking sentences into words
+
+Above, I broke sentences down to their individual words. This is helpful
+for certain kinds of analyses. For instance, let’s focus on the
+following sentence:
+
+``` r
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]]
+```
+
+    ## [1] "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal"
+
+We can split on all whitespace characters by using the pattern `\\s+`:
+this is called a *regular expression*.
+
+``` r
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "\\s+")
+```
+
+    ## [[1]]
+    ##  [1] "Four"        "score"       "and"         "seven"       "years"      
+    ##  [6] "ago"         "our"         "fathers"     "brought"     "forth"      
+    ## [11] "on"          "this"        "continent,"  "a"           "new"        
+    ## [16] "nation,"     "conceived"   "in"          "Liberty,"    "and"        
+    ## [21] "dedicated"   "to"          "the"         "proposition" "that"       
+    ## [26] "all"         "men"         "are"         "created"     "equal"
+
+However, that leaves the commas associated with some words\! Instead, we
+can use a collection of different characters; the regular expression
+`[:punct:]` will capture any and all punctuation. Putting both symbols
+in square brackets `[...]` means “use either of these.” Chaining all of
+this together
+
+``` r
+df_gettysburg %>% 
+  pull(sentence) %>% 
+  .[[1]] %>% 
+  str_split(., "[[:punct:]\\s]+")
+```
+
+    ## [[1]]
+    ##  [1] "Four"        "score"       "and"         "seven"       "years"      
+    ##  [6] "ago"         "our"         "fathers"     "brought"     "forth"      
+    ## [11] "on"          "this"        "continent"   "a"           "new"        
+    ## [16] "nation"      "conceived"   "in"          "Liberty"     "and"        
+    ## [21] "dedicated"   "to"          "the"         "proposition" "that"       
+    ## [26] "all"         "men"         "are"         "created"     "equal"
+
+### Reshaping the data
+
+Splitting the sentences into words is a good idea, but there’s a bit
+more work we need to do to make the data useful. Look at what happens
+when we split the sentences into words:
+
+``` r
+df_gettysburg %>% 
+  mutate(words = str_split(sentence, "[[:punct:]\\s]+")) %>% 
+  select(words)
+```
+
+    ## # A tibble: 11 × 1
+    ##    words     
+    ##    <list>    
+    ##  1 <chr [30]>
+    ##  2 <chr [24]>
+    ##  3 <chr [11]>
+    ##  4 <chr [27]>
+    ##  5 <chr [11]>
+    ##  6 <chr [19]>
+    ##  7 <chr [21]>
+    ##  8 <chr [21]>
+    ##  9 <chr [26]>
+    ## 10 <chr [82]>
+    ## 11 <chr [1]>
+
+We can’t see the actual words\! That’s because each row “value” is
+actually a list of words (technically, a character vector). To deal with
+this, we can use the function `unnest_longer()` to “unravel” each of the
+word lists into its own row:
+
+``` r
+df_gettysburg %>% 
+  mutate(word = str_split(sentence, "[[:punct:]\\s]+")) %>% 
+  select(word) %>% 
+  unnest_longer(word)
+```
+
+    ## # A tibble: 273 × 1
+    ##    word   
+    ##    <chr>  
+    ##  1 Four   
+    ##  2 score  
+    ##  3 and    
+    ##  4 seven  
+    ##  5 years  
+    ##  6 ago    
+    ##  7 our    
+    ##  8 fathers
+    ##  9 brought
+    ## 10 forth  
+    ## # ℹ 263 more rows
+
+This is a far more useful arrangement of the data. You can learn more
+about tidying data [here](https://posit.cloud/learn/primers/4).
