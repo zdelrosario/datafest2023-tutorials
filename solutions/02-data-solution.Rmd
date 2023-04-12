@@ -304,6 +304,8 @@ We can make a number of observations:
 One last analysis; we can look for interesting trends by comparing the frequency of words in our dataset against the frequency of words as they tend to occur in other sources.
 
 The following downloads a word frequency dataset from [Peter Norvig's website](http://norvig.com/ngrams/). This is from the *Google Web Trillion Word Corpus*, which will reflect more modern speech, rather than the contemporary speech patterns at the time of the Gettysburg Address.
+
+*Note*: This is an example use of external data... but since we're showing this example, you probably can't win the "Best Use of External Data" award by just copying this approach!
   
 ```{r}
 url_count1w <- "http://norvig.com/ngrams/count_1w.txt"

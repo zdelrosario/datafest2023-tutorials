@@ -665,6 +665,10 @@ Trillion Word Corpus*, which will reflect more modern speech, rather
 than the contemporary speech patterns at the time of the Gettysburg
 Address.
 
+*Note*: This is an example use of external data… but since we’re showing
+this example, you probably can’t win the “Best Use of External Data”
+award by just copying this approach\!
+
 ``` r
 url_count1w <- "http://norvig.com/ngrams/count_1w.txt"
 filename_count1w <- "./data/count_1w.txt"
