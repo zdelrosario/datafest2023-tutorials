@@ -378,3 +378,27 @@ ggplot(diamonds) +
   - `Ideal` cut diamonds tend to be more expensive
   - `Fair` cut diamonds tend to be less expensive
 <!-- solution-end -->
+
+### A note on formatting & saving images
+
+At the end of DataFest, you will have to record a short video to present your work. Something you should *absolutely* do is ensure all of your data visualizations are clearly readable. To do this, you can use the `theme()` function to adjust the text size on your graph. You can also adjust the plot labels using `labs()`, and save your figure using `ggsave()`. The following code demonstrates how to do all of this: It will save the figure below to an image called `test_image.png`, which will be located in the same folder as this notebook.
+
+```{r}
+ggplot(diamonds) +
+  geom_point(aes(x = carat, y = price)) +
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14)
+  ) +
+  labs(
+    x = "Carat",
+    y = "Price ($)"
+  )
+
+ggsave(
+  filename = "test_image.png",
+  bg = "white"
+)
+```
+

@@ -4,9 +4,9 @@
 *Purpose*: The most powerful way for us to learn about a dataset is to
 *visualize the data*. Throughout this class we will make extensive use
 of the *grammar of graphics*, a powerful graphical programming *grammar*
-that will allow us to create just about any graph you can imagine!
+that will allow us to create just about any graph you can imagine\!
 
-## Optional (But Recommended!) Reading
+## Optional (But Recommended\!) Reading
 
 If you have time before DataFest, I highly recommend working through the
 following reading:
@@ -26,32 +26,34 @@ We will walk through the following code together in the tutorial.
 The following code chunk will set up our coding environment. You must
 *execute* the code chunk, to do so, either:
 
--   Click the **green arrow** at the right end of the code chunk, *OR*
--   Click inside the code chunk, then press the key combination
-    *Control + Enter*
+  - Click the **green arrow** at the right end of the code chunk, *OR*
+  - Click inside the code chunk, then press the key combination *Control
+    + Enter*
 
 If you do this correctly, you should see about a dozen lines of text
 appear below the chunk. These should say *Attaching packages*, along
 with a list of packages and version numbers. If you don’t see this, make
-sure to ask for help!
+sure to ask for help\!
 
 ``` r
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.3.6      ✔ purrr   0.3.4 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.0      ✔ stringr 1.4.1 
-    ## ✔ readr   2.1.2      ✔ forcats 0.5.2 
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Attaching core tidyverse packages ────────────────────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.1     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
+    ## ── Conflicts ──────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 
 ## Anatomy of a `ggplot`
 
 We use `ggplot` to visualize data, but first we need some data to
-visualize! The following code will display the `mpg` dataset. This is a
+visualize\! The following code will display the `mpg` dataset. This is a
 dataset of performance characteristics for a couple hundred models of
 imported cars.
 
@@ -74,7 +76,7 @@ mpg
     ##  8 audi         a4 quattro   1.8  1999     4 manu… 4        18    26 p     comp…
     ##  9 audi         a4 quattro   1.8  1999     4 auto… 4        16    25 p     comp…
     ## 10 audi         a4 quattro   2    2008     4 manu… 4        20    28 p     comp…
-    ## # … with 224 more rows
+    ## # ℹ 224 more rows
 
 To construct a plot using ggplot, we can use code like the following:
 
@@ -192,7 +194,7 @@ ggplot(
 From this display, we can see that `suv` and `pickup` class vehicles
 tend to have much lower fuel economy than other types. Additionally, we
 can now see that that “bulge” of `hwy` values around \~16 was `suv` and
-`pickup` vehicles!
+`pickup` vehicles\!
 
 ### Bars
 
@@ -280,11 +282,16 @@ ggplot(
   geom_point()
 ```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+
 ![](01-visualization-solution_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 # (EXERCISES)
 
-Try each of these on your own!
+Try each of these on your own\!
 
 ### **q1** Inspect the data
 
@@ -311,10 +318,10 @@ diamonds
     ##  8  0.26 Very Good H     SI1      61.9    55   337  4.07  4.11  2.53
     ##  9  0.22 Fair      E     VS2      65.1    61   337  3.87  3.78  2.49
     ## 10  0.23 Very Good H     VS1      59.4    61   338  4     4.05  2.39
-    ## # … with 53,930 more rows
+    ## # ℹ 53,930 more rows
 
 Now that we have the list of variables in the dataset, we know what we
-can visualize!
+can visualize\!
 
 ### **q2** Make a bar chart
 
@@ -361,9 +368,9 @@ should go from about `0` to `5`.
 
 ### **q4** Make a targeted histogram
 
-The following code *filters* the dataset to only those rows where
-`carat <= 1.1`. Complete the code to make a histogram of the `carat`
-values. Answer the questions below.
+The following code *filters* the dataset to only those rows where `carat
+<= 1.1`. Complete the code to make a histogram of the `carat` values.
+Answer the questions below.
 
 ``` r
 ## TODO: Complete the following code
@@ -385,8 +392,8 @@ for q4 to your plot for q3. What is different? - The range is now much
 smaller, from 0 to 1.2 - How many “spikes” (especially high-count
 regions of `carat`) can you find in the histogram? Where are they
 located? *Hint* You will **need** to increase the number of `bins` to
-see all the spikes! - I see about 6 “spikes,” located at: 0.3, 0.4, 0.5,
-0.7, 0.9, and 1.0 - Do the spikes tend to be symmetric around their
+see all the spikes\! - I see about 6 “spikes,” located at: 0.3, 0.4,
+0.5, 0.7, 0.9, and 1.0 - Do the spikes tend to be symmetric around their
 highest value? Or do they “taper” to one side? - The spikes are
 consistently asymmetric; they tend to drop off rapidly towards lower
 values, but slope gently towards larger values. - What might be the
@@ -410,8 +417,8 @@ ggplot(diamonds) +
 
 **Observations**:
 
--   `price` generally increases with `carat`
--   The trend is not ‘clean’; there is no single curve in the
+  - `price` generally increases with `carat`
+  - The trend is not ‘clean’; there is no single curve in the
     relationship
 
 ## A note on *aesthetics*
@@ -440,7 +447,43 @@ ggplot(diamonds) +
 
 **Observations**:
 
--   `price` generally increases with `carat`
--   The `cut` helps explain the variation in price;
-    -   `Ideal` cut diamonds tend to be more expensive
-    -   `Fair` cut diamonds tend to be less expensive
+  - `price` generally increases with `carat`
+  - The `cut` helps explain the variation in price;
+      - `Ideal` cut diamonds tend to be more expensive
+      - `Fair` cut diamonds tend to be less expensive
+
+### A note on formatting & saving images
+
+At the end of DataFest, you will have to record a short video to present
+your work. Something you should *absolutely* do is ensure all of your
+data visualizations are clearly readable. To do this, you can use the
+`theme()` function to adjust the text size on your graph. You can also
+adjust the plot labels using `labs()`, and save your figure using
+`ggsave()`. The following code demonstrates how to do all of this: It
+will save the figure below to an image called `test_image.png`, which
+will be located in the same folder as this notebook.
+
+``` r
+ggplot(diamonds) +
+  geom_point(aes(x = carat, y = price)) +
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14)
+  ) +
+  labs(
+    x = "Carat",
+    y = "Price ($)"
+  )
+```
+
+![](01-visualization-solution_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+ggsave(
+  filename = "test_image.png",
+  bg = "white"
+)
+```
+
+    ## Saving 7 x 5 in image
